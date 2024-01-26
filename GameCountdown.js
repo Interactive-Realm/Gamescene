@@ -61,9 +61,11 @@ updateCountdown() {
         // Update the countdown text
         this.countdownText.setText("START").setBackgroundColor('#e30613'); 
     }
-    else 
-    {
-        this.scene.start('GameScene');
+    else {
+        console.log("countdown finished from GameCountdown")
+        this.countdownText.destroy();
+        // Dispatch the event when the countdown is complete
+        this.events.emit('countdownFinished');
     }
 }
 }

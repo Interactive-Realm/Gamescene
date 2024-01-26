@@ -1,4 +1,7 @@
 import Phaser from 'phaser';
+
+// Game Scene imports:
+import GameCountdown from './GameCountdown';
 import RedBalloon from './assets/balloon_red_string_ram.png';
 import Flag from './assets/flag.png';
 import Explosion1 from './assets/explosion1.png';
@@ -8,10 +11,16 @@ import Explosion4 from './assets/explosion4.png';
 import Explosion5 from './assets/explosion5.png';
 import Explosion6 from './assets/explosion6.png';
 
+
+
 export default class GameScene extends Phaser.Scene {
 
     constructor() {
         super('GameScene');
+
+        // GameCountdown launch decider
+        this.launchGameCountdown = false;
+
         // Spawnvariables
         this.lastBallonSpawnTime = 0;
         this.balloonSpawnInterval = 200; // in milliseconds
@@ -43,13 +52,7 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
 
-
-        
-
-        const text = this.add.text(this.sys.game.config.width/2, this.sys.game.config.height/2, 'Game Scene');
-        text.setOrigin(0.5, 0.5);
-        this.startCountdown();
-
+        // Add Scorelabel
         this.scoreLabel = this.add.text(this.sys.game.config.width - 10, 20, 'SCORE: 0', {
             fontSize: '32px',
             fill: '#fff',
@@ -69,7 +72,28 @@ export default class GameScene extends Phaser.Scene {
             boxDecorationBreak: 'clone',
             boxSizing: 'border-box',
             
-        }).setPadding({x: 15});
+        }).setPadding({x: 15}).setVisible(false);
+
+        if(this.launchGameCountdown) {
+            const gameCountdownScene = this.scene.add('GameCountdown', GameCountdown);
+
+        // Listen for the event using the global event emitter
+        gameCountdownScene.events.on('countdownFinished', this.handleCountdownFinished, this);
+
+        // Launch the GameCountdown scene
+        this.scene.launch('GameCountdown');
+        } 
+        else 
+        {
+            this.scoreLabel.setVisible(true);
+            this.startGame();
+        }
+        
+        
+
+        
+
+        
 
         // Enable fullscreen button
         this.input.keyboard.on('keydown-F', function (event) {
@@ -81,16 +105,30 @@ export default class GameScene extends Phaser.Scene {
         }, this);
     }
 
+    handleCountdownFinished() {
+        // Countdown is finished, start the game
+        console.log("finished countdown");
+        this.launchGameCountdown = false;
+        this.startGame();
+    }
+
+    startGame() {
+        this.scoreLabel.setVisible(true);
+        this.startGameTimer();
+    }
+
     update(time, delta) {
+        if(this.launchGameCountdown == false) {
+            if (time - this.lastBallonSpawnTime > this.balloonSpawnInterval) {
+                this.spawnBalloonObject();
+                this.lastBallonSpawnTime = time;
+            }
+            if (time - this.lastFlagSpawnTime > this.flagSpawnInterval) {
+                this.spawnFlagObject();
+                this.lastFlagSpawnTime = time;
+            }
+        }
         
-        if (time - this.lastBallonSpawnTime > this.balloonSpawnInterval) {
-            this.spawnBalloonObject();
-            this.lastBallonSpawnTime = time;
-        }
-        if (time - this.lastFlagSpawnTime > this.flagSpawnInterval) {
-            this.spawnFlagObject();
-            this.lastFlagSpawnTime = time;
-        }
         //this.countdown.update();
         
     }
@@ -186,7 +224,7 @@ export default class GameScene extends Phaser.Scene {
     });
     }
 
-    startCountdown() {
+    startGameTimer() {
         // Display the initial time
         this.timerLabel = 
         this.add.text(10, 20, 'TIME LEFT: ' + this.formatTime(this.initialTime), 
@@ -242,11 +280,6 @@ export default class GameScene extends Phaser.Scene {
         return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
     }
 
-    
-
-    handleCountdownFinished() {
-
-    }
 }
 
 
