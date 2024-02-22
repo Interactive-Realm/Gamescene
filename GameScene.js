@@ -3,7 +3,10 @@ import Phaser from 'phaser';
 // Game Scene imports:
 import GameCountdown from './GameCountdown';
 import RedBalloon from './assets/balloon_red_string_ram.png';
-import Flag from './assets/flag.png';
+import Knife from './assets/ButterKnife_128x128.png';
+import Fork from './assets/Fork_128x128.png';
+import Bottle from './assets/BeerBottle_128x128.png';
+import Flag from './assets/Bubble1.png';
 import Explosion1 from './assets/explosion1.png';
 import Explosion2 from './assets/explosion2.png';
 import Explosion3 from './assets/explosion3.png';
@@ -23,13 +26,13 @@ export default class GameScene extends Phaser.Scene {
 
         // Spawnvariables
         this.lastBallonSpawnTime = 0;
-        this.balloonSpawnInterval = 200; // in milliseconds
+        this.balloonSpawnInterval = 300; // in milliseconds
         this.lastFlagSpawnTime = 0;
-        this.flagSpawnInterval = 400;
+        this.flagSpawnInterval = 800;
 
         // Timer variables
         this.timer;
-        this.initialTime = 10; // in seconds
+        this.initialTime = 20; // in seconds
         this.timerLabel;
 
         // Score variable
@@ -40,7 +43,9 @@ export default class GameScene extends Phaser.Scene {
         
     }
     preload() {
-        this.load.image('red_balloon', RedBalloon);
+        this.load.image('knife', Knife);
+        this.load.image('fork', Fork);
+        this.load.image('bottle', Bottle);
         this.load.image('flag', Flag);
         this.load.image('explosion_image1', Explosion1);
         this.load.image('explosion_image2', Explosion2);
@@ -136,29 +141,29 @@ export default class GameScene extends Phaser.Scene {
     spawnFlagObject() {
         const flagObject = this.add.image(
             Phaser.Math.Between(0, this.sys.game.config.width),
-            -this.sys.game.config.height + 400, // spawner lige over browser vinduet
+            +this.sys.game.config.height + 120, // spawner lige over browser vinduet
             'flag'
-        ).setDepth(0).setScale(0.1);
+        ).setDepth(0).setScale(this.FloatBetween(0.05, 0.2));
 
         this.physics.add.existing(flagObject);
         flagObject.body.setVelocity(0, 100);
 
         
     // Set initial rotation and angular velocity
-    flagObject.rotation = Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)); // Random initial rotation
-    const angularVelocity = Phaser.Math.FloatBetween(-180, 180); // Random angular velocity
+    //flagObject.rotation = Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)); // Random initial rotation
+    //const angularVelocity = Phaser.Math.FloatBetween(-180, 180); // Random angular velocity
 
     // Set initial horizontal velocity
-    const horizontalVelocity = Phaser.Math.FloatBetween(-50, 50); // Random horizontal velocity
+    //const horizontalVelocity = Phaser.Math.FloatBetween(-50, 50); // Random horizontal velocity
 
     this.physics.add.existing(flagObject);
 
     // Set angular velocity
-    flagObject.body.angularVelocity = angularVelocity;
+    //flagObject.body.angularVelocity = angularVelocity;
 
     // Set horizontal velocity
-    flagObject.body.setVelocityX(horizontalVelocity);
-    flagObject.body.setVelocityY(100); // Vertical velocity
+    //flagObject.body.setVelocityX(horizontalVelocity);
+    flagObject.body.setVelocityY(Phaser.Math.Between(-50, -100)); // Vertical velocity
 
     // Optional: Add damping to gradually slow down rotation and movement
     flagObject.body.angularDamping = 0.95;
@@ -169,52 +174,59 @@ export default class GameScene extends Phaser.Scene {
     }
 
     spawnBalloonObject() {
+
+        // Array containing filenames of the images
+        const trashImages = ['knife', 'fork', 'bottle'];
+
+        // Randomly select an image filename from the array
+        const randomImage = Phaser.Math.RND.pick(trashImages);
+
         // Create and position your the balloon
         const balloonObject = this.add.image(
             Phaser.Math.Between(0, this.sys.game.config.width),
-            this.sys.game.config.height + 120, // spawner lige under browser vinduet
-            'red_balloon'
-        ).setDepth(1).setScale(0.2);
+            this.sys.game.config.height - 1200, // spawner lige under browser vinduet
+            randomImage
+        ).setDepth(1).setScale(1);
   
         
         this.physics.add.existing(balloonObject);
-        balloonObject.body.setVelocity(0, Phaser.Math.Between(-175, -215));
+        balloonObject.body.setVelocity(0, Phaser.Math.Between(+175, +215));
         balloonObject.setInteractive();
         
-        // Declare the explosion variable outside the callback
-        let explosion;
-        // Listen for the pointerdown event
-        balloonObject.on('pointerdown', () => {
-            balloonObject.destroy();
+        // // Declare the explosion variable outside the callback
+        // let explosion;
+        // // Listen for the pointerdown event
+         balloonObject.on('pointerdown', () => {
+             balloonObject.destroy();
             
-             // Create a new image at the position of the destroyed balloonObject
-        const explosion = this.add.sprite(
-            balloonObject.x,
-            balloonObject.y,
-            'explosion_image1'
-        ).setDepth(1).setScale(0.6);
+        //      // Create a new image at the position of the destroyed balloonObject
+        // const explosion = this.add.sprite(
+        //     balloonObject.x,
+        //     balloonObject.y,
+        //     'explosion_image1'
+        // ).setDepth(1).setScale(0.6);
         
-        // Set up animation
-        this.anims.create({
-            key: 'explode',
-            frames: [
-                { key: 'explosion_image1' },
-                { key: 'explosion_image2' },
-                { key: 'explosion_image3' },
-                { key: 'explosion_image4' },
-                { key: 'explosion_image5' },
-                { key: 'explosion_image6' }
-            ],
-            frameRate: 20, // Number of frames per second
-            repeat: 0 // Play the animation only once
-        });
+        // // Set up animation
+        // this.anims.create({
+        //     key: 'explode',
+        //     frames: [
+        //         { key: 'explosion_image1' },
+        //         { key: 'explosion_image2' },
+        //         { key: 'explosion_image3' },
+        //         { key: 'explosion_image4' },
+        //         { key: 'explosion_image5' },
+        //         { key: 'explosion_image6' }
+        //     ],
+        //     frameRate: 20, // Number of frames per second
+        //     repeat: 0 // Play the animation only once
+        // });
 
-        // Play the animation
-        explosion.on('animationcomplete', () => {
-            explosion.destroy();
-        });
+        // // Play the animation
+        // explosion.on('animationcomplete', () => {
+        //     explosion.destroy();
+        // });
 
-        explosion.play('explode');
+        // explosion.play('explode');
 
         // Increment the score
         this.score += 1;
@@ -223,6 +235,12 @@ export default class GameScene extends Phaser.Scene {
         this.scoreLabel.setText('SCORE: ' + this.score);
     });
     }
+
+    // Generate random float numbers
+    FloatBetween = function (min, max)
+    {
+        return Math.random() * (max - min) + min;
+    };
 
     startGameTimer() {
         // Display the initial time
